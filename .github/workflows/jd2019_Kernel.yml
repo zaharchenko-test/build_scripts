@@ -1,4 +1,4 @@
-name: Building Kernel test
+name: Building jd2019 Kernel
 
 on:
   workflow_dispatch:
