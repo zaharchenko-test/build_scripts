@@ -1,0 +1,73 @@
+name: Building kunlun2 Kernel
+
+on:
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@master
+
+      - name: Cleanup
+        uses: rokibhasansagar/slimhub_actions@main
+
+      - name: Prepare the environment
+        run: |
+          sudo apt update -y
+          sudo apt upgrade -y
+          sudo apt install -y flex bc bison git python zip build-essential tar wget
+          sudo apt clean
+
+      - name: Install toolchain
+        run: |
+          mkdir -p workspace
+          cd workspace
+          mkdir -p clang
+          cd clang
+          wget -q https://android.googlesource.com/platform/prebuilts/clang/host/linux-x86/+archive/refs/heads/master/clang-r468909.tar.gz
+          tar -xf clang-r468909.tar.gz
+          rm -rf clang-r468909.tar.gz
+
+      - name: Clone repo
+        run: |
+          cd workspace
+          sudo hostname jzinferno
+          git config --global user.name "jzinferno"
+          git config --global user.email "jekazinferno@gmail.com"
+          git clone --depth=1 https://github.com/jzinferno/anykernel.git anykernel
+          git clone --depth=1 https://github.com/jzinferno/kernel_lenovo_sdm710.git kernel
+
+      - name: Set Swap Space
+        uses: pierotofy/set-swap-space@master
+        with:
+          swap-size-gb: 12
+
+      - name: Build kernel kunlun2
+        run: |
+          sudo fallocate -l 8G $HOME/swapjz
+          sudo chmod 600 $HOME/swapjz
+          sudo mkswap $HOME/swapjz
+          sudo swapon $HOME/swapjz
+          export PATH=$(realpath workspace/clang/bin):$PATH
+          export CROSS_COMPILE=aarch64-linux-gnu-
+          cd workspace/kernel
+          rm -rf out
+          make LLVM=1 LLVM_IAS=1 O=out ARCH=arm64 kunlun2_defconfig
+          make LLVM=1 LLVM_IAS=1 O=out ARCH=arm64 -j$(nproc --all)
+          cd ../anykernel/kunlun2
+          mv ../../kernel/out/arch/arm64/boot/Image.gz-dtb .
+          cp -r ../bin .
+          zip -r9 kernel_kunlun2_$(date +%Y%m%d).zip META-INF bin Image.gz-dtb
+
+      - name: Release kernel
+        uses: softprops/action-gh-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tag_name: ${{ github.run_id }}
+          name: kernel_${{ github.run_id }}
+          files: |
+            workspace/anykernel/kunlun2/*.zip

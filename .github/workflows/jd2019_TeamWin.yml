@@ -1,0 +1,89 @@
+name: Building jd2019 TeamWin recovery
+
+on:
+  workflow_dispatch:
+
+env:
+  MANIFEST_URL: https://github.com/minimal-manifest-twrp/platform_manifest_twrp_aosp.git
+  MANIFEST_BRANCH: twrp-12.1
+  DEVICE_TREE_URL: https://github.com/jzinferno/device_lenovo_jd2019.git
+  DEVICE_TREE_BRANCH: fox_12.1
+  DEVICE_PATH: device/lenovo/jd2019
+  DEVICE_NAME: jd2019
+  DEVICE_VARIANT: twrp
+  TZ: Asia/Kolkata
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@master
+
+      - name: Cleanup
+        uses: rokibhasansagar/slimhub_actions@main
+
+      - name: Setup java
+        uses: actions/setup-java@v2
+        with:
+          distribution: 'adopt'
+          java-version: '11'
+
+      - name: Prepare the environment
+        run: |
+          sudo apt update
+          sudo apt -y upgrade
+          sudo apt -y install gperf gcc-multilib gcc-10-multilib g++-multilib g++-10-multilib libc6-dev lib32ncurses5-dev x11proto-core-dev libx11-dev tree lib32z-dev libgl1-mesa-dev libxml2-utils xsltproc bc ccache lib32readline-dev lib32z1-dev liblz4-tool libncurses5-dev libsdl1.2-dev libwxgtk3.0-gtk3-dev libxml2 lzop pngcrush schedtool squashfs-tools imagemagick libbz2-dev lzma ncftp qemu-user-static libstdc++-10-dev python aria2 libncurses5 python3
+          sudo apt clean
+
+      - name: Install repo
+        run: |
+          mkdir ~/bin
+          curl https://storage.googleapis.com/git-repo-downloads/repo > ~/bin/repo
+          chmod a+x ~/bin/repo
+          sudo ln -sf ~/bin/repo /usr/bin/repo
+
+      - name: Initialize repo
+        run: |
+          mkdir workspace
+          cd workspace
+          git config --global user.name 'jzinferno'
+          git config --global user.email 'jekazinferno@gmail.com'
+          repo init --depth=1 -q -u $MANIFEST_URL -b $MANIFEST_BRANCH
+
+      - name: Repo Sync
+        run: |
+          cd workspace
+          repo sync -c -f -q --force-sync --no-clone-bundle --no-tags -j$(nproc --all)
+
+      - name: Clone device tree
+        run: |
+          git clone --depth=1 $DEVICE_TREE_URL -b $DEVICE_TREE_BRANCH ./workspace/$DEVICE_PATH
+
+      - name: Set Swap Space
+        uses: pierotofy/set-swap-space@master
+        with:
+          swap-size-gb: 12
+
+      - name: Building recovery
+        run: |
+          cd workspace
+          export PATH=/opt/hostedtoolcache/Java_Adopt_jdk/11.0.16-101/x64/bin:$PATH
+          export ALLOW_MISSING_DEPENDENCIES=true
+          source build/envsetup.sh
+          export TW_Y_OFFSET=80
+          export TW_H_OFFSET=-80
+          lunch "$DEVICE_VARIANT"_"$DEVICE_NAME"-eng && mka recoveryimage
+
+      - name: Release recovery
+        uses: softprops/action-gh-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tag_name: ${{ github.run_id }}
+          body: |
+            Text: 'build TeamWin 12.1 jd2019'
+          name: TeamWin
+          files: |
+            workspace/out/target/product/jd2019/recovery.img
