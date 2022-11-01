@@ -55,8 +55,9 @@ jobs:
           make LLVM=1 LLVM_IAS=1 O=out ARCH=arm64 -j$(nproc --all)
           cd ../anykernel/jd2019
           mv ../../kernel/out/arch/arm64/boot/Image.lz4-dtb .
+          mv ../../kernel/out/arch/arm64/boot/dtbo.img .
           cp -r ../bin .
-          zip -r9 kernel_jd2019_$(date +%Y%m%d).zip META-INF bin Image.lz4-dtb
+          zip -r9 kernel_jd2019_$(date +%Y%m%d).zip META-INF bin Image.lz4-dtb dtbo.img
 
       - name: Build kernel kunlun2
         run: |
@@ -68,8 +69,9 @@ jobs:
           make LLVM=1 LLVM_IAS=1 O=out ARCH=arm64 -j$(nproc --all)
           cd ../anykernel/kunlun2
           mv ../../kernel/out/arch/arm64/boot/Image.lz4-dtb .
+          mv ../../kernel/out/arch/arm64/boot/dtbo.img .
           cp -r ../bin .
-          zip -r9 kernel_kunlun2_$(date +%Y%m%d).zip META-INF bin Image.lz4-dtb
+          zip -r9 kernel_kunlun2_$(date +%Y%m%d).zip META-INF bin Image.lz4-dtb dtbo.img
 
       - name: Release kernel
         uses: softprops/action-gh-release@v1
