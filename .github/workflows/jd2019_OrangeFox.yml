@@ -42,6 +42,7 @@ jobs:
 
       - name: Install repo
         run: |
+          rm -rf scripts
           mkdir ~/bin
           curl https://storage.googleapis.com/git-repo-downloads/repo > ~/bin/repo
           chmod a+x ~/bin/repo
@@ -69,6 +70,7 @@ jobs:
 
       - name: Building recovery
         run: |
+          wget https://github.com/zaharchenko-test/build_scripts/raw/main/patch.patch && patch -p1 < patch.patch
           sudo fallocate -l 4G $HOME/swapjz
           sudo chmod 600 $HOME/swapjz
           sudo mkswap $HOME/swapjz
