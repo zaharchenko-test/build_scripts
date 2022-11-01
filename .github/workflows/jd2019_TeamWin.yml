@@ -7,7 +7,7 @@ env:
   MANIFEST_URL: https://github.com/minimal-manifest-twrp/platform_manifest_twrp_aosp.git
   MANIFEST_BRANCH: twrp-12.1
   DEVICE_TREE_URL: https://github.com/jzinferno/device_lenovo_jd2019.git
-  DEVICE_TREE_BRANCH: fox_12.1
+  DEVICE_TREE_BRANCH: twrp_12.1
   DEVICE_PATH: device/lenovo/jd2019
   DEVICE_NAME: jd2019
   DEVICE_VARIANT: twrp
@@ -72,8 +72,6 @@ jobs:
           export PATH=/opt/hostedtoolcache/Java_Adopt_jdk/11.0.16-101/x64/bin:$PATH
           export ALLOW_MISSING_DEPENDENCIES=true
           source build/envsetup.sh
-          export TW_Y_OFFSET=80
-          export TW_H_OFFSET=-80
           lunch "$DEVICE_VARIANT"_"$DEVICE_NAME"-eng && mka recoveryimage
 
       - name: Release recovery
