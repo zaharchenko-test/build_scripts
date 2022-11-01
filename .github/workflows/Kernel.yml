@@ -1,4 +1,4 @@
-name: Building jd2019 Kernel
+name: Building Kernel
 
 on:
   workflow_dispatch:
@@ -18,7 +18,7 @@ jobs:
         run: |
           sudo apt update -y
           sudo apt upgrade -y
-          sudo apt install -y flex bc bison git python zip build-essential tar wget
+          sudo apt install -y flex bc bison git python zip build-essential tar wget lz4
           sudo apt clean
 
       - name: Install toolchain
@@ -47,10 +47,6 @@ jobs:
 
       - name: Build kernel jd2019
         run: |
-          sudo fallocate -l 8G $HOME/swapjz
-          sudo chmod 600 $HOME/swapjz
-          sudo mkswap $HOME/swapjz
-          sudo swapon $HOME/swapjz
           export PATH=$(realpath workspace/clang/bin):$PATH
           export CROSS_COMPILE=aarch64-linux-gnu-
           cd workspace/kernel
@@ -58,9 +54,22 @@ jobs:
           make LLVM=1 LLVM_IAS=1 O=out ARCH=arm64 jd2019_defconfig
           make LLVM=1 LLVM_IAS=1 O=out ARCH=arm64 -j$(nproc --all)
           cd ../anykernel/jd2019
-          mv ../../kernel/out/arch/arm64/boot/Image.gz-dtb .
+          mv ../../kernel/out/arch/arm64/boot/Image.lz4-dtb .
           cp -r ../bin .
-          zip -r9 kernel_jd2019_$(date +%Y%m%d).zip META-INF bin Image.gz-dtb
+          zip -r9 kernel_jd2019_$(date +%Y%m%d).zip META-INF bin Image.lz4-dtb
+
+      - name: Build kernel kunlun2
+        run: |
+          export PATH=$(realpath workspace/clang/bin):$PATH
+          export CROSS_COMPILE=aarch64-linux-gnu-
+          cd workspace/kernel
+          rm -rf out
+          make LLVM=1 LLVM_IAS=1 O=out ARCH=arm64 kunlun2_defconfig
+          make LLVM=1 LLVM_IAS=1 O=out ARCH=arm64 -j$(nproc --all)
+          cd ../anykernel/kunlun2
+          mv ../../kernel/out/arch/arm64/boot/Image.lz4-dtb .
+          cp -r ../bin .
+          zip -r9 kernel_kunlun2_$(date +%Y%m%d).zip META-INF bin Image.lz4-dtb
 
       - name: Release kernel
         uses: softprops/action-gh-release@v1
@@ -71,3 +80,4 @@ jobs:
           name: kernel_${{ github.run_id }}
           files: |
             workspace/anykernel/jd2019/*.zip
+            workspace/anykernel/kunlun2/*.zip
