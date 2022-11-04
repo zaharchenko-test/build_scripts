@@ -1,13 +1,15 @@
-name: Building jd2019 OrangeFox recovery
+name: Building kunlun2 TeamWin recovery
 
 on:
   workflow_dispatch:
 
 env:
-  DEVICE_TREE_URL: https://github.com/jzinferno/device_lenovo_jd2019.git
-  DEVICE_TREE_BRANCH: fox_12.1
-  DEVICE_PATH: device/lenovo/jd2019
-  DEVICE_NAME: jd2019
+  MANIFEST_URL: https://github.com/minimal-manifest-twrp/platform_manifest_twrp_aosp.git
+  MANIFEST_BRANCH: twrp-12.1
+  DEVICE_TREE_URL: https://github.com/jzinferno/device_lenovo_kunlun2.git
+  DEVICE_TREE_BRANCH: twrp_12.1
+  DEVICE_PATH: device/lenovo/kunlun2
+  DEVICE_NAME: kunlun2
   DEVICE_VARIANT: twrp
   TZ: Asia/Kolkata
 
@@ -32,17 +34,11 @@ jobs:
         run: |
           sudo apt update
           sudo apt -y upgrade
-          sudo apt -y install gperf  python aria2 libncurses5 python3
+          sudo apt -y install gperf gcc-multilib gcc-10-multilib g++-multilib g++-10-multilib libc6-dev lib32ncurses5-dev x11proto-core-dev libx11-dev tree lib32z-dev libgl1-mesa-dev libxml2-utils xsltproc bc ccache lib32readline-dev lib32z1-dev liblz4-tool libncurses5-dev libsdl1.2-dev libwxgtk3.0-gtk3-dev libxml2 lzop pngcrush schedtool squashfs-tools imagemagick libbz2-dev lzma ncftp qemu-user-static libstdc++-10-dev python aria2 libncurses5 python3
           sudo apt clean
-          git clone --depth=1 https://gitlab.com/OrangeFox/misc/scripts.git
-          cd scripts
-          sudo bash setup/android_build_env.sh
-          sudo bash setup/install_android_sdk.sh
-        continue-on-error: true
 
       - name: Install repo
         run: |
-          rm -rf scripts
           mkdir ~/bin
           curl https://storage.googleapis.com/git-repo-downloads/repo > ~/bin/repo
           chmod a+x ~/bin/repo
@@ -50,14 +46,16 @@ jobs:
 
       - name: Initialize repo
         run: |
-          sudo apt clean
           mkdir workspace
+          cd workspace
           git config --global user.name 'jzinferno'
           git config --global user.email 'jekazinferno@gmail.com'
-          git clone --depth=1 https://gitlab.com/OrangeFox/sync.git
-          cd sync
-          ./orangefox_sync.sh --branch 12.1 --path ../workspace
-          cd .. && rm -rf sync
+          repo init --depth=1 -q -u $MANIFEST_URL -b $MANIFEST_BRANCH
+
+      - name: Repo Sync
+        run: |
+          cd workspace
+          repo sync -c -f -q --force-sync --no-clone-bundle --no-tags -j$(nproc --all)
 
       - name: Clone device tree
         run: |
@@ -70,17 +68,10 @@ jobs:
 
       - name: Building recovery
         run: |
-          wget https://github.com/zaharchenko-test/build_scripts/raw/main/patch.patch && patch -p1 < patch.patch
-          sudo fallocate -l 4G $HOME/swapjz
-          sudo chmod 600 $HOME/swapjz
-          sudo mkswap $HOME/swapjz
-          sudo swapon $HOME/swapjz
           cd workspace
           export PATH=/opt/hostedtoolcache/Java_Adopt_jdk/11.0.16-101/x64/bin:$PATH
-          source build/envsetup.sh
           export ALLOW_MISSING_DEPENDENCIES=true
-          export FOX_USE_TWRP_RECOVERY_IMAGE_BUILDER=1
-          export LC_ALL="C"
+          source build/envsetup.sh
           lunch "$DEVICE_VARIANT"_"$DEVICE_NAME"-eng && mka recoveryimage
 
       - name: Release recovery
@@ -90,8 +81,7 @@ jobs:
         with:
           tag_name: ${{ github.run_id }}
           body: |
-            Text: 'build OrangeFox 12.1 jd2019'
+            build TeamWin 12.1 kunlun2
           name: TeamWin
           files: |
-            workspace/out/target/product/jd2019/OrangeFox*.zip
-            workspace/out/target/product/jd2019/recovery.img
+            workspace/out/target/product/kunlun2/recovery.img

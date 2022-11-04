@@ -81,7 +81,7 @@ jobs:
         with:
           tag_name: ${{ github.run_id }}
           body: |
-            Text: 'build TeamWin 12.1 jd2019'
+            build TeamWin 12.1 jd2019
           name: TeamWin
           files: |
             workspace/out/target/product/jd2019/recovery.img
