@@ -1,0 +1,96 @@
+name: Building kunlun2 OrangeFox recovery
+
+on:
+  workflow_dispatch:
+
+env:
+  DEVICE_TREE_URL: https://github.com/deanlancer/android_device_lenovo_kunlun2.git
+  DEVICE_TREE_BRANCH: fox_12.1
+  DEVICE_PATH: device/lenovo/kunlun2
+  DEVICE_NAME: kunlun2
+  DEVICE_VARIANT: twrp
+  TZ: Asia/Kolkata
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@master
+
+      - name: Cleanup
+        uses: rokibhasansagar/slimhub_actions@main
+
+      - name: Setup java
+        uses: actions/setup-java@v2
+        with:
+          distribution: 'adopt'
+          java-version: '11'
+
+      - name: Prepare the environment
+        run: |
+          sudo apt update
+          sudo apt -y upgrade
+          sudo apt -y install gperf  python aria2 libncurses5 python3
+          sudo apt clean
+          git clone --depth=1 https://gitlab.com/OrangeFox/misc/scripts.git
+          cd scripts
+          sudo bash setup/android_build_env.sh
+          sudo bash setup/install_android_sdk.sh
+        continue-on-error: true
+
+      - name: Install repo
+        run: |
+          rm -rf scripts
+          mkdir ~/bin
+          curl https://storage.googleapis.com/git-repo-downloads/repo > ~/bin/repo
+          chmod a+x ~/bin/repo
+          sudo ln -sf ~/bin/repo /usr/bin/repo
+
+      - name: Initialize repo
+        run: |
+          sudo apt clean
+          mkdir workspace
+          git config --global user.name 'jzinferno'
+          git config --global user.email 'jekazinferno@gmail.com'
+          git clone --depth=1 https://gitlab.com/OrangeFox/sync.git
+          cd sync
+          ./orangefox_sync.sh --branch 12.1 --path ../workspace
+          cd .. && rm -rf sync
+
+      - name: Clone device tree
+        run: |
+          git clone --depth=1 $DEVICE_TREE_URL -b $DEVICE_TREE_BRANCH ./workspace/$DEVICE_PATH
+
+      - name: Set Swap Space
+        uses: pierotofy/set-swap-space@master
+        with:
+          swap-size-gb: 12
+
+      - name: Building recovery
+        run: |
+          sudo fallocate -l 4G $HOME/swapjz
+          sudo chmod 600 $HOME/swapjz
+          sudo mkswap $HOME/swapjz
+          sudo swapon $HOME/swapjz
+          cd workspace
+          export PATH=/opt/hostedtoolcache/Java_Adopt_jdk/11.0.16-101/x64/bin:$PATH
+          source build/envsetup.sh
+          export ALLOW_MISSING_DEPENDENCIES=true
+          export FOX_USE_TWRP_RECOVERY_IMAGE_BUILDER=1
+          export LC_ALL="C"
+          lunch "$DEVICE_VARIANT"_"$DEVICE_NAME"-eng && mka recoveryimage
+
+      - name: Release recovery
+        uses: softprops/action-gh-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tag_name: ${{ github.run_id }}
+          body: |
+            Text: 'build OrangeFox 12.1 kunlun2'
+          name: TeamWin
+          files: |
+            workspace/out/target/*/jd2019/OrangeFox*.zip
+            workspace/out/target/*/jd2019/recovery.img
