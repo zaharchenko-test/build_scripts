@@ -1,4 +1,4 @@
-name: Building Kernel
+name: Building jd2019 Kernel
 
 on:
   workflow_dispatch:
@@ -78,21 +78,6 @@ jobs:
           cp -r ../bin .
           zip -r9 clang_jd2019_$(date +%Y%m%d).zip META-INF bin Image.lz4-dtb dtbo.img
 
-      - name: Build clang kunlun2
-        run: |
-          export PATH=$(realpath workspace/clang/bin):$PATH
-          export PATH=$(realpath workspace/lz4):$PATH
-          export DTC=$(realpath workspace/dtc/dtc)
-          cd workspace/kernel
-          rm -rf out
-          make LLVM=1 LLVM_IAS=1 DTC=$DTC O=out ARCH=arm64 kunlun2_defconfig
-          make LLVM=1 LLVM_IAS=1 DTC=$DTC O=out ARCH=arm64 -j$(nproc --all)
-          cd ../anykernel/kunlun2
-          mv ../../kernel/out/arch/arm64/boot/Image.lz4-dtb .
-          mv ../../kernel/out/arch/arm64/boot/dtbo.img .
-          cp -r ../bin .
-          zip -r9 clang_kunlun2_$(date +%Y%m%d).zip META-INF bin Image.lz4-dtb dtbo.img
-
       - name: Build gcc jd2019
         run: |
           export PATH=$(realpath workspace/gcc-arm64/bin):$PATH
@@ -111,24 +96,6 @@ jobs:
           mv ../../kernel/out/arch/arm64/boot/dtbo.img .
           zip -r9 gcc_jd2019_$(date +%Y%m%d).zip META-INF bin Image.lz4-dtb dtbo.img
 
-      - name: Build gcc kunlun2
-        run: |
-          export PATH=$(realpath workspace/gcc-arm64/bin):$PATH
-          export PATH=$(realpath workspace/gcc-arm/bin):$PATH
-          export PATH=$(realpath workspace/lz4):$PATH
-          export DTC=$(realpath workspace/dtc/dtc)
-          export CROSS_COMPILE_COMPAT=arm-linux-gnueabihf-
-          export CROSS_COMPILE=aarch64-linux-gnu-
-          cd workspace/kernel
-          rm -rf out
-          make DTC=$DTC O=out ARCH=arm64 gcc_kunlun2_defconfig
-          make DTC=$DTC O=out ARCH=arm64 -j$(nproc --all)
-          cd ../anykernel/kunlun2
-          rm -rf Image.lz4-dtb dtbo.img
-          mv ../../kernel/out/arch/arm64/boot/Image.lz4-dtb .
-          mv ../../kernel/out/arch/arm64/boot/dtbo.img .
-          zip -r9 gcc_kunlun2_$(date +%Y%m%d).zip META-INF bin Image.lz4-dtb dtbo.img
-
       - name: Release kernel
         uses: softprops/action-gh-release@v1
         env:
@@ -138,4 +105,3 @@ jobs:
           name: kernel_${{ github.run_id }}
           files: |
             workspace/anykernel/jd2019/*.zip
-            workspace/anykernel/kunlun2/*.zip
