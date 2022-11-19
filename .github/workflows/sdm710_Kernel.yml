@@ -18,7 +18,7 @@ jobs:
         run: |
           sudo apt update -y
           sudo apt upgrade -y
-          sudo apt install -y flex bc bison git python zip build-essential tar wget lz4
+          sudo apt install -y flex bc bison git python zip build-essential tar wget swig python3-dev
           sudo apt clean
 
       - name: Install toolchain
@@ -26,6 +26,14 @@ jobs:
           mkdir -p workspace
           cd workspace
           mkdir -p clang
+          wget -q https://snapshots.linaro.org/gnu-toolchain/13.0-2022.11-1/aarch64-linux-gnu/gcc-linaro-13.0.0-2022.11-x86_64_aarch64-linux-gnu.tar.xz
+          wget -q https://snapshots.linaro.org/gnu-toolchain/13.0-2022.11-1/arm-linux-gnueabihf/gcc-linaro-13.0.0-2022.11-x86_64_arm-linux-gnueabihf.tar.xz
+          tar -xf gcc-linaro-13.0.0-2022.11-x86_64_aarch64-linux-gnu.tar.xz
+          tar -xf gcc-linaro-13.0.0-2022.11-x86_64_arm-linux-gnueabihf.tar.xz
+          rm -rf gcc-linaro-13.0.0-2022.11-x86_64_aarch64-linux-gnu.tar.xz
+          rm -rf gcc-linaro-13.0.0-2022.11-x86_64_arm-linux-gnueabihf.tar.xz
+          mv gcc-linaro-13.0.0-2022.11-x86_64_aarch64-linux-gnu gcc-arm64
+          mv gcc-linaro-13.0.0-2022.11-x86_64_arm-linux-gnueabihf gcc-arm
           cd clang
           wget -q https://android.googlesource.com/platform/prebuilts/clang/host/linux-x86/+archive/refs/heads/master/clang-r468909.tar.gz
           tar -xf clang-r468909.tar.gz
@@ -39,39 +47,87 @@ jobs:
           git config --global user.email "jekazinferno@gmail.com"
           git clone --depth=1 https://github.com/jzinferno/anykernel.git anykernel
           git clone --depth=1 https://github.com/jzinferno/kernel_lenovo_sdm710.git kernel
+          git clone --depth=1 https://github.com/lz4/lz4.git
+          git clone --depth=1 https://git.kernel.org/pub/scm/utils/dtc/dtc.git
+
+      - name: Make deps
+        run: |
+          cd workspace/lz4
+          make -j$(nproc --all)
+          ln -s lz4 lz4c
+          cd ../dtc
+          make NO_PYTHON=1 -j$(nproc --all)
 
       - name: Set Swap Space
         uses: pierotofy/set-swap-space@master
         with:
           swap-size-gb: 12
 
-      - name: Build kernel jd2019
+      - name: Build clang jd2019
         run: |
           export PATH=$(realpath workspace/clang/bin):$PATH
-          export CROSS_COMPILE=aarch64-linux-gnu-
+          export PATH=$(realpath workspace/lz4):$PATH
+          export DTC=$(realpath workspace/dtc/dtc)
           cd workspace/kernel
           rm -rf out
-          make LLVM=1 LLVM_IAS=1 O=out ARCH=arm64 jd2019_defconfig
-          make LLVM=1 LLVM_IAS=1 O=out ARCH=arm64 -j$(nproc --all)
+          make LLVM=1 LLVM_IAS=1 DTC=$DTC O=out ARCH=arm64 jd2019_defconfig
+          make LLVM=1 LLVM_IAS=1 DTC=$DTC O=out ARCH=arm64 -j$(nproc --all)
           cd ../anykernel/jd2019
           mv ../../kernel/out/arch/arm64/boot/Image.lz4-dtb .
           mv ../../kernel/out/arch/arm64/boot/dtbo.img .
           cp -r ../bin .
-          zip -r9 kernel_jd2019_$(date +%Y%m%d).zip META-INF bin Image.lz4-dtb dtbo.img
+          zip -r9 clang_jd2019_$(date +%Y%m%d).zip META-INF bin Image.lz4-dtb dtbo.img
 
-      - name: Build kernel kunlun2
+      - name: Build clang kunlun2
         run: |
           export PATH=$(realpath workspace/clang/bin):$PATH
-          export CROSS_COMPILE=aarch64-linux-gnu-
+          export PATH=$(realpath workspace/lz4):$PATH
+          export DTC=$(realpath workspace/dtc/dtc)
           cd workspace/kernel
           rm -rf out
-          make LLVM=1 LLVM_IAS=1 O=out ARCH=arm64 kunlun2_defconfig
-          make LLVM=1 LLVM_IAS=1 O=out ARCH=arm64 -j$(nproc --all)
+          make LLVM=1 LLVM_IAS=1 DTC=$DTC O=out ARCH=arm64 kunlun2_defconfig
+          make LLVM=1 LLVM_IAS=1 DTC=$DTC O=out ARCH=arm64 -j$(nproc --all)
           cd ../anykernel/kunlun2
           mv ../../kernel/out/arch/arm64/boot/Image.lz4-dtb .
           mv ../../kernel/out/arch/arm64/boot/dtbo.img .
           cp -r ../bin .
-          zip -r9 kernel_kunlun2_$(date +%Y%m%d).zip META-INF bin Image.lz4-dtb dtbo.img
+          zip -r9 clang_kunlun2_$(date +%Y%m%d).zip META-INF bin Image.lz4-dtb dtbo.img
+
+      - name: Build gcc jd2019
+        run: |
+          export PATH=$(realpath workspace/gcc-arm64/bin):$PATH
+          export PATH=$(realpath workspace/gcc-arm/bin):$PATH
+          export PATH=$(realpath workspace/lz4):$PATH
+          export DTC=$(realpath workspace/dtc/dtc)
+          export CROSS_COMPILE_COMPAT=arm-linux-gnueabihf-
+          export CROSS_COMPILE=aarch64-linux-gnu-
+          cd workspace/kernel
+          rm -rf out
+          make DTC=$DTC O=out ARCH=arm64 gcc_jd2019_defconfig
+          make DTC=$DTC O=out ARCH=arm64 -j$(nproc --all)
+          cd ../anykernel/jd2019
+          rm -rf Image.lz4-dtb dtbo.img
+          mv ../../kernel/out/arch/arm64/boot/Image.lz4-dtb .
+          mv ../../kernel/out/arch/arm64/boot/dtbo.img .
+          zip -r9 gcc_jd2019_$(date +%Y%m%d).zip META-INF bin Image.lz4-dtb dtbo.img
+
+      - name: Build gcc kunlun2
+        run: |
+          export PATH=$(realpath workspace/gcc-arm64/bin):$PATH
+          export PATH=$(realpath workspace/gcc-arm/bin):$PATH
+          export PATH=$(realpath workspace/lz4):$PATH
+          export DTC=$(realpath workspace/dtc/dtc)
+          export CROSS_COMPILE_COMPAT=arm-linux-gnueabihf-
+          export CROSS_COMPILE=aarch64-linux-gnu-
+          cd workspace/kernel
+          rm -rf out
+          make DTC=$DTC O=out ARCH=arm64 gcc_kunlun2_defconfig
+          make DTC=$DTC O=out ARCH=arm64 -j$(nproc --all)
+          cd ../anykernel/kunlun2
+          rm -rf Image.lz4-dtb dtbo.img
+          mv ../../kernel/out/arch/arm64/boot/Image.lz4-dtb .
+          mv ../../kernel/out/arch/arm64/boot/dtbo.img .
+          zip -r9 gcc_kunlun2_$(date +%Y%m%d).zip META-INF bin Image.lz4-dtb dtbo.img
 
       - name: Release kernel
         uses: softprops/action-gh-release@v1
