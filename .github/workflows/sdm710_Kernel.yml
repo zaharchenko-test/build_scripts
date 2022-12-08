@@ -28,12 +28,12 @@ jobs:
           mkdir -p clang anykernel && cd clang
           wget -q https://snapshots.linaro.org/gnu-toolchain/13.0-2022.11-1/aarch64-linux-gnu/gcc-linaro-13.0.0-2022.11-x86_64_aarch64-linux-gnu.tar.xz
           wget -q https://snapshots.linaro.org/gnu-toolchain/13.0-2022.11-1/arm-linux-gnueabihf/gcc-linaro-13.0.0-2022.11-x86_64_arm-linux-gnueabihf.tar.xz
-          wget -q https://android.googlesource.com/platform/prebuilts/clang/host/linux-x86/+archive/refs/heads/master/clang-r468909b.tar.gz
+          wget -q https://android.googlesource.com/platform/prebuilts/clang/host/linux-x86/+archive/refs/heads/master/clang-r475365.tar.gz
           tar -xf gcc-linaro-13.0.0-2022.11-x86_64_aarch64-linux-gnu.tar.xz
           tar -xf gcc-linaro-13.0.0-2022.11-x86_64_arm-linux-gnueabihf.tar.xz
           cp -r gcc-linaro-13.0.0-2022.11-x86_64_aarch64-linux-gnu/* .
           cp -r gcc-linaro-13.0.0-2022.11-x86_64_arm-linux-gnueabihf/* .
-          tar -xf clang-r468909b.tar.gz
+          tar -xf clang-r475365.tar.gz
           rm -rf gcc-linaro* *.gz *.xz
 
       - name: Clone repo
