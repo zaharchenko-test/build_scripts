@@ -57,7 +57,7 @@ jobs:
           make LLVM=1 LLVM_IAS=1 O=out ARCH=arm64 jd2019_defconfig
           make LLVM=1 LLVM_IAS=1 O=out ARCH=arm64 -j$(nproc --all)
           cd out/arch/arm64/boot
-          zip -r9 jd2019_kernel_clang_$(date +%Y%m%d).zip META-INF bin files Image.lz4-dtb dtbo.img
+          zip -r9 jd2019_kernel_clang_$(date +%Y%m%d).zip META-INF bin files Image.lz4-dtb
           mv *.zip ../../../../../anykernel
 
       - name: Build clang kunlun2
@@ -68,7 +68,7 @@ jobs:
           make LLVM=1 LLVM_IAS=1 O=out ARCH=arm64 kunlun2_defconfig
           make LLVM=1 LLVM_IAS=1 O=out ARCH=arm64 -j$(nproc --all)
           cd out/arch/arm64/boot
-          zip -r9 kunlun2_kernel_clang_$(date +%Y%m%d).zip META-INF bin files Image.lz4-dtb dtbo.img
+          zip -r9 kunlun2_kernel_clang_$(date +%Y%m%d).zip META-INF bin files Image.lz4-dtb
           mv *.zip ../../../../../anykernel
 
       - name: Build gcc jd2019
@@ -82,7 +82,7 @@ jobs:
           make O=out ARCH=arm64 jd2019_defconfig
           make O=out ARCH=arm64 -j$(nproc --all)
           cd out/arch/arm64/boot
-          zip -r9 jd2019_kernel_gcc_$(date +%Y%m%d).zip META-INF bin files Image.lz4-dtb dtbo.img
+          zip -r9 jd2019_kernel_gcc_$(date +%Y%m%d).zip META-INF bin files Image.lz4-dtb
           mv *.zip ../../../../../anykernel
 
       - name: Build gcc kunlun2
@@ -96,7 +96,7 @@ jobs:
           make O=out ARCH=arm64 kunlun2_defconfig
           make O=out ARCH=arm64 -j$(nproc --all)
           cd out/arch/arm64/boot
-          zip -r9 kunlun2_kernel_gcc_$(date +%Y%m%d).zip META-INF bin files Image.lz4-dtb dtbo.img
+          zip -r9 kunlun2_kernel_gcc_$(date +%Y%m%d).zip META-INF bin files Image.lz4-dtb
           mv *.zip ../../../../../anykernel
 
       - name: Release kernel
