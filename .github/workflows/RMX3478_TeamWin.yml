@@ -6,7 +6,7 @@ on:
 env:
   MANIFEST_URL: https://github.com/minimal-manifest-twrp/platform_manifest_twrp_aosp.git
   MANIFEST_BRANCH: twrp-12.1
-  DEVICE_TREE_URL: https://github.com/zaharchenko-test/TWRP-RMX3478.git
+  DEVICE_TREE_URL: https://github.com/jzinferno/device_realme_RMX3478.git
   DEVICE_PATH: device/realme/RMX3478
   DEVICE_NAME: RMX3478
   DEVICE_VARIANT: twrp
@@ -83,4 +83,3 @@ jobs:
           name: TeamWin
           files: |
             workspace/out/target/product/*/*.img
-            workspace/out/target/product/*/*.zip
