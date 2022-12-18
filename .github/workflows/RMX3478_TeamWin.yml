@@ -1,4 +1,4 @@
-name: Building Realme TeamWin recovery
+name: Building RMX3478 TeamWin recovery
 
 on:
   workflow_dispatch:
