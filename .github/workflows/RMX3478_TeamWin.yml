@@ -70,7 +70,7 @@ jobs:
           export PATH=/opt/hostedtoolcache/Java_Adopt_jdk/11.0.16-101/x64/bin:$PATH
           export ALLOW_MISSING_DEPENDENCIES=true
           source build/envsetup.sh
-          lunch "$DEVICE_VARIANT"_"$DEVICE_NAME"-eng && mka recoveryimage
+          lunch "$DEVICE_VARIANT"_"$DEVICE_NAME"-eng && mka bootimage
 
       - name: Release recovery
         uses: softprops/action-gh-release@v1
@@ -82,5 +82,5 @@ jobs:
             build TeamWin 12.1 Realme
           name: TeamWin
           files: |
-            workspace/out/target/product/*/recovery.img
+            workspace/out/target/product/*/*.img
             workspace/out/target/product/*/*.zip
