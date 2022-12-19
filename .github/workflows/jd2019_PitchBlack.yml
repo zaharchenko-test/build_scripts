@@ -70,7 +70,7 @@ jobs:
           cd workspace
           export ALLOW_MISSING_DEPENDENCIES=true
           source build/envsetup.sh
-          lunch "$DEVICE_VARIANT"_"$DEVICE_NAME"-eng && mka recoveryimage
+          lunch "$DEVICE_VARIANT"_"$DEVICE_NAME"-eng && mka pbrp
 
       - name: Release recovery
         uses: softprops/action-gh-release@v1
