@@ -1,4 +1,4 @@
-name: Building jd2019 PitchBlack recovery
+name: Building jd2019 ShyHawk recovery
 
 on:
   workflow_dispatch:
