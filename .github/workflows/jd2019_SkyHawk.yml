@@ -79,8 +79,8 @@ jobs:
         with:
           tag_name: ${{ github.run_id }}
           body: |
-            build PBRP 12.1 jd2019
-          name: PitchBlack
+            build SHRP 12.1 jd2019
+          name: ShyHawk
           files: |
             workspace/out/target/product/*/*.img
             workspace/out/target/product/*/*.zip
