@@ -17,7 +17,6 @@ jobs:
       - name: Prepare the environment
         run: |
           sudo apt update -y
-          sudo apt upgrade -y
           sudo apt install -y flex bc bison git python2 zip build-essential tar wget swig python3-dev lz4
           sudo apt clean
 
