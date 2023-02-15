@@ -26,14 +26,14 @@ jobs:
           mkdir -p workspace
           cd workspace
           mkdir -p clang anykernel && cd clang
-          wget -q https://snapshots.linaro.org/gnu-toolchain/13.0-2022.11-1/aarch64-linux-gnu/gcc-linaro-13.0.0-2022.11-x86_64_aarch64-linux-gnu.tar.xz
-          wget -q https://snapshots.linaro.org/gnu-toolchain/13.0-2022.11-1/arm-linux-gnueabihf/gcc-linaro-13.0.0-2022.11-x86_64_arm-linux-gnueabihf.tar.xz
-          wget -q https://android.googlesource.com/platform/prebuilts/clang/host/linux-x86/+archive/refs/heads/master/clang-r475365.tar.gz
-          tar -xf gcc-linaro-13.0.0-2022.11-x86_64_aarch64-linux-gnu.tar.xz
-          tar -xf gcc-linaro-13.0.0-2022.11-x86_64_arm-linux-gnueabihf.tar.xz
-          cp -r gcc-linaro-13.0.0-2022.11-x86_64_aarch64-linux-gnu/* .
-          cp -r gcc-linaro-13.0.0-2022.11-x86_64_arm-linux-gnueabihf/* .
-          tar -xf clang-r475365.tar.gz
+          wget -q https://snapshots.linaro.org/gnu-toolchain/12.2-2022.12-1/aarch64-linux-gnu/gcc-linaro-12.2.1-2022.12-x86_64_aarch64-linux-gnu.tar.xz
+          wget -q https://snapshots.linaro.org/gnu-toolchain/12.2-2022.12-1/arm-linux-gnueabihf/gcc-linaro-12.2.1-2022.12-x86_64_arm-linux-gnueabihf.tar.xz
+          wget -q https://android.googlesource.com/platform/prebuilts/clang/host/linux-x86/+archive/refs/heads/master/clang-r487747.tar.gz
+          tar -xf gcc-linaro-*-x86_64_aarch64-linux-gnu.tar.xz
+          tar -xf gcc-linaro-*-x86_64_arm-linux-gnueabihf.tar.xz
+          cp -r gcc-linaro-*-x86_64_aarch64-linux-gnu/* .
+          cp -r gcc-linaro-*-x86_64_arm-linux-gnueabihf/* .
+          tar -xf clang-*.tar.gz
           rm -rf gcc-linaro* *.gz *.xz
 
       - name: Clone repo
@@ -47,7 +47,7 @@ jobs:
       - name: Set Swap Space
         uses: pierotofy/set-swap-space@master
         with:
-          swap-size-gb: 12
+          swap-size-gb: 8
 
       - name: Build clang jd2019
         run: |
