@@ -7,7 +7,7 @@ env:
   MANIFEST_URL: https://github.com/minimal-manifest-twrp/platform_manifest_twrp_aosp.git
   MANIFEST_BRANCH: twrp-12.1
   DEVICE_TREE_URL: https://github.com/zaharchenko-test/twrp.git
-  DEVICE_TREE_BRANCH: fox_12.1
+  DEVICE_TREE_BRANCH: main
   DEVICE_PATH: device/lenovo/jd2019
   DEVICE_NAME: jd2019
   DEVICE_VARIANT: twrp
