@@ -35,7 +35,7 @@ jobs:
           sudo hostname jzinferno
           git config --global user.name "jzinferno2"
           git config --global user.email "jekazinferno@gmail.com"
-          git clone --depth=1 https://github.com/jzinferno2/kernel_lenovo_sdm710.git kernel
+          git clone --depth=1 https://github.com/jzinferno/kernel_lenovo_sdm710.git kernel
 
       - name: Set Swap Space
         uses: pierotofy/set-swap-space@master
@@ -50,7 +50,7 @@ jobs:
           make LLVM=1 LLVM_IAS=1 O=out ARCH=arm64 jd2019_defconfig
           make LLVM=1 LLVM_IAS=1 O=out ARCH=arm64 -j$(nproc --all)
           cd out/arch/arm64/boot
-          zip -r9 jd2019_KernelSU_$(date +%Y%m%d).zip META-INF bin files Image.lz4-dtb
+          zip -r9 jd2019__$(date +%Y%m%d).zip META-INF bin files Image.gz-dtb
           mv *.zip ../../../../../anykernel
 
       - name: Build clang kunlun2
@@ -61,7 +61,7 @@ jobs:
           make LLVM=1 LLVM_IAS=1 O=out ARCH=arm64 kunlun2_defconfig
           make LLVM=1 LLVM_IAS=1 O=out ARCH=arm64 -j$(nproc --all)
           cd out/arch/arm64/boot
-          zip -r9 kunlun2_KernelSU_$(date +%Y%m%d).zip META-INF bin files Image.lz4-dtb
+          zip -r9 kunlun2__$(date +%Y%m%d).zip META-INF bin files Image.gz-dtb
           mv *.zip ../../../../../anykernel
 
       - name: Release kernel
