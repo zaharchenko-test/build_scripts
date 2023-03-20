@@ -1,0 +1,22 @@
+name: Enable Zram
+
+on:
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@master
+
+      - name: Swap
+        run: |
+          modprobe zram
+          echo lz4 > /sys/block/zram0/comp_algorithm
+          echo 12G > /sys/block/zram0/disksize
+          mkswap --label zram0 /dev/zram0
+          swapon --priority 100 /dev/zram0
+          cat /proc/swaps
+          free -m
