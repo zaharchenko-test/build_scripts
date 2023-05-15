@@ -25,7 +25,7 @@ jobs:
           mkdir -p workspace
           cd workspace
           mkdir -p clang anykernel && cd clang
-          wget -q https://android.googlesource.com/platform/prebuilts/clang/host/linux-x86/+archive/refs/heads/master/clang-r487747b.tar.gz
+          wget -q https://android.googlesource.com/platform/prebuilts/clang/host/linux-x86/+archive/refs/heads/master/clang-r487747c.tar.gz
           tar -xf clang-*.tar.gz
 
       - name: Clone repo
