@@ -35,6 +35,7 @@ jobs:
           git config --global user.name "jzinferno2"
           git config --global user.email "jekazinferno@gmail.com"
           git clone --depth=1 --recursive https://github.com/jzinferno2/kernel_lenovo_sdm710.git kernel
+          cd kernel && git submodule update --remote
 
       - name: Set Swap Space
         uses: pierotofy/set-swap-space@master
