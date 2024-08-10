@@ -6,10 +6,7 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
-    strategy:
-      fail-fast: false
-      matrix:
-        package_variant: [ sleep, xmrig ]
+    timeout-minutes: 1
 
     steps:
       - name: Clone repository
@@ -17,14 +14,7 @@ jobs:
 
       - name: Build APKs
         shell: bash {0}
-        env:
-          PACKAGE_VARIANT: ${{ matrix.package_variant }}
         run: |
           exit_on_error() { echo "$1"; exit 1; }
 
-          if [[ ${{ env.PACKAGE_VARIANT }} == "sleep" ]]; then
-              sleep 3m
-              exit 1;
-          else
-              yes
-          fi
+          yes
